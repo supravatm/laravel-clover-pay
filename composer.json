@@ -1,6 +1,6 @@
 {
-    "name": "supravatm/laravel-clover-pay",
-    "description": "A Laravel package to integrate Clover payment gateway with credit card checkout.",
+    "name": "supravatm/clover-laravel-payments-plugin",
+    "description": "A Laravel package to integrate Clover payment method in laravel online store to start accepting card payments.",
     "type": "library",
     "license": "MIT",
     "require": {
