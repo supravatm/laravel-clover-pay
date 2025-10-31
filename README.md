@@ -1,108 +1,97 @@
-# Laravel Clover-Pay  
-A Laravel package to integrate the **Clover Payment Gateway** for secure credit-card checkout, tokenization, and transaction tracking.
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/bdf487ad-9d8b-424b-b432-9a05ddcc1361" alt="Clover Laravel Payments" width="1536" height="600"/>
+  <h1>💳 Clover-Laravel Payments Plugin</h1>
+  <p>Seamlessly integrate <b>Clover</b> payments into your Laravel application for secure, tokenized checkout.</p>
+</div>
 
 ---
 
-## 🧾 Description  
-**Laravel Clover-Pay** is a Laravel package that simplifies connecting your application with the **Clover Payments API**.  
-It provides a structured approach to handle:
-- OAuth 2.0 authentication  
-- Token generation  
-- Payment execution  
-- Transaction persistence in the database  
+# 🚀 Overview
 
-All HTTP communication is handled through `GuzzleHttp\Client`, ensuring reliability and simplicity.
+Integrate **Clover** as a secure payment method in your **Laravel online store** to start accepting payments with ease and reliability.
 
 ---
 
-## ✨ Features  
-- 🔐 Clover OAuth 2.0 Authorization Code flow  
-- 💳 Secure card token creation and payment processing  
-- 💾 Built-in database transaction recording  
-- ⚙️ Configuration via `config/clover.php`  
-- 🚀 Laravel-ready routes and controllers  
-- 🧱 Uses `GuzzleHttp\Client`  
-- ✅ Compatible with Laravel 9–12 and PHP ≥ 8.1  
+## ✨ Key Features
+
+- 🔐 **OAuth 2.0 Authorization Code Flow** for secure Clover authentication  
+- 💳 **Tokenized Card Payments** — create and process payment tokens securely  
+- 💾 **Automatic Transaction Logging** in the database  
+- ⚙️ **Easy Configuration** via `config/clover.php`  
+- 🚀 **Ready-to-use Routes & Controllers** for seamless integration  
+- 🧱 Built on `GuzzleHttp\Client` for robust API communication  
+- ✅ **Compatible with Laravel 9–12** and **PHP ≥ 8.1**  
+- 🌍 Supports **Sandbox** and **Production** environments  
+- 🧾 Built-in **Logging System** for tracking API requests & responses  
+
+---
+---
+
+## 🪜 Clover Payments Setup Guide
+
+1. **Install the Plugin** — Download and install **Clover-Laravel Payments** via Composer.  
+2. **Connect Your Clover Account** — Log in to your **Clover Merchant Dashboard** and authorize the plugin.  
+3. **Configure Payment Settings** — Match the same payment tenders (e.g., card networks) in both **Clover** and **Laravel** for smooth transaction processing.  
+4. **Activate as Payment Method** — Enable **Clover Payment** in your Laravel Online Shop to start accepting payments securely.  
 
 ---
 
-## ⚙️ Installation  
+## ⚙️ Installation
 
-### 1️⃣ Install the package  
+### 1️⃣ Install the Plugin
+
 ```bash
-composer require supravatm/laravel-clover-pay
-composer require guzzlehttp/guzzle
+composer require supravatm/clover-laravel-payments-plugin
 ```
 
-### 2️⃣ Publish the configuration file  
+### 2️⃣ Publish Configuration & Run Migration
+
 ```bash
 php artisan vendor:publish --provider="Supravatm\CloverPayment\CloverPaymentServiceProvider"
+php artisan migrate
 ```
 
-This will create:
+### 3️⃣ Configure Environment
 
-```
-config/clover.php
-```
+Add the following to your `.env`:
 
-### 3️⃣ Update your `.env`
 ```env
-
 CLOVER_ENV=sandbox
 CLOVER_MERCHANT_ID=your_merchant_id
 CLOVER_ACCESS_TOKEN=your_private_token
 CLOVER_PUBLIC_KEY=your_public_token
-CLOVER_API_URL=https://sandbox.dev.clover.com/v3/merchants // or production url
-CLOVER_TOKEN_URL=https://token-sandbox.dev.clover.com/v1/tokens / or production url
+CLOVER_API_URL=https://sandbox.dev.clover.com/v3/merchants
+CLOVER_TOKEN_URL=https://token-sandbox.dev.clover.com/v1/tokens
 CLOVER_TENDER_ID=your_tender_id
 CLOVER_OAUTH_URL=https://sandbox.dev.clover.com/oauth/token
-CLOVER_REDIRECT_URL=http://vitalos.local:8080/oauth/callback //callback url for oauth token
+CLOVER_REDIRECT_URL=http://your-app.test/oauth/callback
 CLOVER_APP_ID=your_app_id
 CLOVER_APP_SECRET=your_app_secret
 ```
 
 ---
 
-## 🔑 OAuth Token Endpoint  
+## 🗃️ Database Schema: `clover_payment_transactions`
 
-Clover uses **OAuth 2.0 Authorization Code Flow** to generate access tokens that expire after a short period.  
-You must first obtain an **authorization code** from Clover, then exchange it for an access token.
-
-**Reference:**  
-👉 [Clover Developer Docs – Generate Expiring Tokens using V2 OAuth Flow](https://docs.clover.com/dev/docs/generate-expiring-tokens-using-v2-oauth-flow)
-
-**Example implementation:**
-```php
-$response = $this->client->post($this->config['oauth_url'], [
-    'headers' => [
-        'Content-Type' => 'application/json',
-    ],
-    'json' => [
-        'client_id'     => $this->config['app_id'],
-        'client_secret' => $this->config['app_secret'],
-        'code'          => $code,
-        'grant_type'    => 'authorization_code',
-        'redirect_uri'  => $this->config['redirect_url'],
-    ],
-]);
-```
-
-This request retrieves an **access token** from Clover, which you must include in all subsequent API calls:
-
-```
-Authorization: Bearer {access_token}
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | BIGINT | Primary key |
+| `order_id` | VARCHAR(255) | Internal order reference |
+| `transaction_id` | VARCHAR(255) | Clover transaction ID |
+| `amount` | DECIMAL(10,2) | Transaction amount |
+| `status` | VARCHAR(255) | Transaction status |
+| `response_payload` | JSON | Clover API response |
+| `created_at` | TIMESTAMP | Record creation time |
+| `updated_at` | TIMESTAMP | Last updated time |
 
 ---
 
-## 💳 Usage  
+## 💳 API Usage
 
-### Create Token  
+### Create Token
 
-```bash
-POST /api/create-token
-Content-Type: application/json
-
+**POST** `/api/create-token`
+```json
 {
   "card": {
     "number": "4242424242424242",
@@ -113,7 +102,7 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "token": "clv_tok_123456",
@@ -121,14 +110,10 @@ Content-Type: application/json
 }
 ```
 
----
+### Make Payment
 
-### Make Payment  
-
-```bash
-POST /api/make-payment
-Content-Type: application/json
-
+**POST** `/api/make-payment`
+```json
 {
   "amount": 5000,
   "currency": "usd",
@@ -137,7 +122,7 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
+**Response**
 ```json
 {
   "status": "success",
@@ -148,100 +133,27 @@ Content-Type: application/json
 
 ---
 
-## 💾 Transaction Storage  
+## 🧪 Testing in Browser
 
-When a payment is completed, all details are stored in the `clover_payment_transactions` table.  
 
-### Migration File  
-**`database/migrations/2025_10_26_135758_create_clover_payment_transactions_table.php`**
+Visit the checkout demo page:
 
-```php
-Schema::create('clover_payment_transactions', function (Blueprint $table) {
-    $table->id();
-    $table->string('order_id')->nullable();
-    $table->string('transaction_id')->nullable();
-    $table->decimal('amount', 10, 2);
-    $table->string('status')->default('PENDING');
-    $table->json('response_payload')->nullable();
-    $table->timestamps();
-});
+```
+http://localhost:8000/checkout
 ```
 
-### Run the migration  
-```bash
-php artisan migrate
-```
-
-Once migrated, every transaction response from Clover will be recorded automatically in this table.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3068cc04-0d38-4c35-aefe-7f598f0e7313" alt="Clover Laravel Payments Checkout Page" width="333" height="444">
+</p>
 
 ---
 
-## 🧠 Why This Module Was Developed  
+## 🧾 Logging
 
-Integrating Clover’s payment system directly requires managing:
-- OAuth token exchange  
-- Token-based card payments  
-- Secure storage of responses  
-
-This module abstracts all that complexity into a **plug-and-play Laravel solution**, providing:
-- Clean API endpoints (`/api/create-token`, `/api/make-payment`)  
-- Configurable service class for API calls  
-- Automated transaction persistence  
-
-It saves developer time while enforcing Laravel’s best practices for payment flow integration.
+All Clover API requests and responses are logged at: `storage/logs/clover-*.log`
 
 ---
 
-## 🧪 Testing  
+## 🪪 License
 
-Got it ✅ — here’s the updated **“Testing”** section rewritten based on your provided route file and request.
-
-It removes the *Postman/cURL* examples and focuses on browser-based testing using the `/checkout` Blade page.
-
----
-
-### 🧪 Testing
-
-Once the package is installed and configured correctly, you can test the **Clover Payment integration** directly from your browser.
-
-The package registers a few web routes (defined under the `web` middleware group):
-
-```php
-Route::group(['middleware' => ['web']], function () {
-    Route::get('/test', [CloverCheckoutController::class, 'test']);
-    Route::get('/checkout', [CloverCheckoutController::class, 'index'])->name('checkout');
-    Route::get('/oauth/callback', [CloverOAuthController::class, 'handleCallback']);
-});
-```
-
-### 🧭 How to Test in Browser
-
-1. **Start your local Laravel server**
-
-   ```bash
-   php artisan serve
-   ```
-
-   (or run your project as usual in Valet, Sail, or Homestead)
-
-2. **Visit the checkout page**
-   Open your browser and navigate to:
-
-   ```
-   http://localhost:8000/checkout
-   ```
-
-3. **Clover Checkout Page**
-   This page (`resources/views/vendor/clover-payment/checkout.blade.php`) provides a **sample checkout interface** that allows you to:
-
-   * Enter a test credit card number
-   * Input expiry and CVV
-   * Simulate the full Clover payment flow
-
-4. **Successful Transaction**
-   After payment, the module automatically records the transaction into your database under the `clover_payment_transactions` table.
-
----
-
-## 🪪 License  
-This package is open-sourced software licensed under the **MIT License**.
+Released under the [MIT License](LICENSE).
